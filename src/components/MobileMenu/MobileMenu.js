@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
-import styled from 'styled-components/macro';
+import styled, { keyframes } from 'styled-components/macro';
 import { DialogOverlay, DialogContent } from '@reach/dialog';
 
-import { QUERIES, WEIGHTS } from '../../constants';
+import { WEIGHTS } from '../../constants';
 
 import UnstyledButton from '../UnstyledButton';
 import Icon from '../Icon';
@@ -11,7 +11,8 @@ import VisuallyHidden from '../VisuallyHidden';
 
 const MobileMenu = ({ isOpen, onDismiss }) => {
   return (
-    <Overlay isOpen={isOpen} onDismiss={onDismiss}>
+    <Wrapper isOpen={isOpen} onDismiss={onDismiss}>
+      <Backdrop />
       <Content aria-label="Menu">
         <CloseButton onClick={onDismiss}>
           <Icon id="close" />
@@ -32,34 +33,81 @@ const MobileMenu = ({ isOpen, onDismiss }) => {
           <SubLink href="/contact">Contact Us</SubLink>
         </Footer>
       </Content>
-    </Overlay>
+    </Wrapper>
   );
 };
 
-const Overlay = styled(DialogOverlay)`
+const fadeInAnimation = keyframes`
+  from {
+    opacity: 0
+  }
+  to {
+    opacity: 1
+  }
+`;
+
+const slideInAnimation = keyframes`
+from {
+  transform: translateX(100%)
+}
+
+to {
+  transform: translateX(0%)
+}
+`;
+
+const Wrapper = styled(DialogOverlay)`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--color-backdrop);
+  background: transparent;
   display: flex;
   justify-content: flex-end;
 `;
 
+const Backdrop = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  animation: ${fadeInAnimation} 500ms;
+  background: var(--color-backdrop);
+`;
+
 const Content = styled(DialogContent)`
+  /*
+    Due to the animation's cubic bezier, 
+    the content will overshoot it's translation to the left and
+    then move back to it's inteded spot. This leaves a slight gap between 
+    the Backdrop and the Content 
+  */
+  --overfill: 16px;
+
+  position: relative;
   background: white;
-  width: 300px;
+  width: calc(var(--overfill) + 300px);
   height: 100%;
+  /* 
+  shift the content over to the right to compensate 
+  for the extra width from overfill
+  */
+  margin-right: calc(var(--overfill) * -1);
   padding: 24px 32px;
   display: flex;
   flex-direction: column;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: ${slideInAnimation} 300ms cubic-bezier(0.1, 0.88, 0.17, 1.14);
+  }
 `;
 
 const CloseButton = styled(UnstyledButton)`
   position: absolute;
   top: 10px;
-  right: 0;
+  right: calc(var(--overfill));
   padding: 16px;
 `;
 
@@ -67,6 +115,11 @@ const Nav = styled.nav`
   display: flex;
   flex-direction: column;
   gap: 16px;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: ${fadeInAnimation} 500ms backwards;
+    animation-delay: 300ms;
+  }
 `;
 
 const NavLink = styled.a`
