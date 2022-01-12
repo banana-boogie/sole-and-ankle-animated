@@ -36,20 +36,16 @@ const ShoeCard = ({
       <Wrapper>
         <ImageWrapper>
           <Image alt="" src={imageSrc} />
-          {variant === 'on-sale' && <SaleFlag>Sale</SaleFlag>}
-          {variant === 'new-release' && (
-            <NewFlag>Just released!</NewFlag>
-          )}
         </ImageWrapper>
+        {variant === 'on-sale' && <SaleFlag>Sale</SaleFlag>}
+        {variant === 'new-release' && <NewFlag>Just released!</NewFlag>}
         <Spacer size={12} />
         <Row>
           <Name>{name}</Name>
           <Price
             style={{
               '--color':
-                variant === 'on-sale'
-                  ? 'var(--color-gray-700)'
-                  : undefined,
+                variant === 'on-sale' ? 'var(--color-gray-700)' : undefined,
               '--text-decoration':
                 variant === 'on-sale' ? 'line-through' : undefined,
             }}
@@ -73,15 +69,47 @@ const Link = styled.a`
   color: inherit;
 `;
 
-const Wrapper = styled.article``;
-
-const ImageWrapper = styled.div`
+const Wrapper = styled.article`
   position: relative;
 `;
 
-const Image = styled.img`
-  width: 100%;
+const ImageWrapper = styled.div`
+  position: relative;
   border-radius: 16px 16px 4px 4px;
+  /* 
+    Image zoomes in on hover/focus,
+    truncate the image that spiilsover
+   */
+  overflow: hidden;
+`;
+
+const Image = styled.img`
+  display: block;
+  width: 100%;
+  transition: transform 500ms ease-in-out, filter 700ms ease-in-out;
+  transform-origin: 50% 75%;
+
+  filter: brightness(90%);
+
+  /* 
+    This is used to tell the browser that this element is going to move.
+    The browser will move this element to a different layer and render it using 
+    the GPU to do the animation;
+  */
+  will-change: transform;
+
+  /*
+    Only enables animation for people that prefer motion (default setting) and
+    devices that have the ability to hover (i.e. not mobile)
+   */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    ${Link}:hover &, ${Link}:focus & {
+      transform: scale(1.1);
+      transition: transform 200ms, filter 100ms;
+
+      filter: brightness(100%);
+    }
+  }
 `;
 
 const Row = styled.div`
